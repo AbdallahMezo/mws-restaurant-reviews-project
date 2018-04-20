@@ -1,5 +1,6 @@
 ## HOW TO START
-###$ Clone the project
+#### Clone the project
+
  `npm install` *Install dependancies*
  `gulp` *run gulp and start server*
  `localhost:8000` *start browsing*
