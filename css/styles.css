@@ -622,3 +622,12 @@ nav h1 a {
         height: auto;
     }
 }
+
+@media screen and (max-width: 320px) {
+    #reviews-container {
+        padding: 0;
+    }
+    #restaurant-container {
+        padding: 140px 0;
+    }
+}

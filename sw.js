@@ -23,13 +23,22 @@ const dirsToCache = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(cacheName)
-      .then(cache => {
-        return cache.addAll(dirsToCache);
-      })
+    .then(cache => {
+      return cache.addAll(dirsToCache);
+    })
   )
 });
 
 self.addEventListener('fetch', function (event) {
+  if (event.request.url.includes('restaurant.html?id=')) {
+    const strippedurl = event.request.url.split('?')[0];
+    event.respondWith(
+      caches.match(strippedurl).then(function (response) {
+        return response || fetch(event.response);
+      })
+    );
+    return;
+  }
   event.respondWith(
     caches.match(event.request).then(function (response) {
       return response || fetch(event.request);
