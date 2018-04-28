@@ -1,6 +1,6 @@
-const cacheName = 'resturants-cache-v4';
-const dirsToCache = [
-  './',
+const cacheName = 'resturants-cache-v6';
+const filesToCache = [
+  '/',
   '/js/dbhelper.js',
   '/js/main.js',
   '/js/restaurant_info.js',
@@ -17,14 +17,18 @@ const dirsToCache = [
   '/img/10.jpg',
   '/data/restaurants.json',
   'index.html',
-  'restaurant.html'
+  'restaurant.html',
 ];
+
+const addToCache = (cache, files) => {
+  cache.addAll(files)
+}
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(cacheName)
     .then(cache => {
-      return cache.addAll(dirsToCache);
+      return addToCache(cache, filesToCache);
     })
   )
 });
@@ -32,15 +36,19 @@ self.addEventListener('install', event => {
 self.addEventListener('fetch', function (event) {
   if (event.request.url.includes('restaurant.html?id=')) {
     const strippedurl = event.request.url.split('?')[0];
+    console.log('== event ==', event);
     event.respondWith(
-      caches.match(strippedurl).then(function (response) {
+      caches.match(strippedurl)
+        .then(function (response) {
         return response || fetch(event.response);
       })
     );
+    console.log('== caches ==', caches);
     return;
   }
   event.respondWith(
-    caches.match(event.request).then(function (response) {
+    caches.match(event.request)
+      .then(function (response) {
       return response || fetch(event.request);
     })
   );
