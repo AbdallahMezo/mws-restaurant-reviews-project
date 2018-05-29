@@ -1,10 +1,5 @@
 let restaurant;
 var map;
-document.addEventListener('DOMContentLoaded', (event) => {
-
-	registerServiceWorker();
-
-});
 /**
  * Initialize Google map, called from HTML.
  */
