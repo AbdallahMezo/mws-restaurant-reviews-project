@@ -1,5 +1,10 @@
 let restaurant;
 var map;
+document.addEventListener('DOMContentLoaded', (event) => {
+
+	registerServiceWorker();
+
+});
 /**
  * Initialize Google map, called from HTML.
  */
@@ -55,7 +60,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   address.innerHTML = restaurant.address;
 
   const image = document.getElementById('restaurant-img');
-  image.className = 'restaurant-img'
+  image.className = 'restaurant-img lazy'
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
   image.setAttribute('alt', `${restaurant.name} Restaurant`);
 
