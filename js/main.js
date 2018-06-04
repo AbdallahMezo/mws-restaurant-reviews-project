@@ -1,7 +1,6 @@
 let restaurants, neighborhoods, cuisines;
 var map;
 var markers = [];
-
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
@@ -9,7 +8,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
 	fetchNeighborhoods();
 	fetchCuisines();
 	registerServiceWorker();
-	createIndexedDB();
+	DBHelper.fetchRestaurants((err, restaurants) => {
+		DBHelper.createIndexedDB(restaurants, 'restaurants');
+	});
+	updateRestaurants();
 });
 
 /**
@@ -82,7 +84,7 @@ window.initMap = () => {
 		center: loc,
 		scrollwheel: false
 	});
-	updateRestaurants();
+	addMarkersToMap();
 };
 
 /**
@@ -132,7 +134,6 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
 	restaurants.forEach((restaurant) => {
 		ul.append(createRestaurantHTML(restaurant));
 	});
-	addMarkersToMap();
 	createGridSystem(ul);
 };
 /**
@@ -165,7 +166,7 @@ createRestaurantHTML = (restaurant) => {
 	const image = document.createElement('img');
 	image.className = 'restaurant-img lazy';
 	image.setAttribute('alt', `${restaurant.name} Restaurant`);
-	image.setAttribute('data-echo', DBHelper.imageUrlForRestaurant(restaurant));
+	image.setAttribute('data-echo',`../img/${restaurant.photograph}.jpg`);
 	image.src = '../img/icon.png';
 	li.append(image);
 
@@ -209,11 +210,15 @@ addMarkersToMap = (restaurants = self.restaurants) => {
  */
 registerServiceWorker = () => {
 	if (!navigator.serviceWorker) return;
+	console.log('== service worker js ==');
 	if ('serviceWorker' in navigator) {
+		const sw = navigator.serviceWorker;
 		window.addEventListener('load', function() {
-			navigator.serviceWorker.register('../sw.js').then(
+			sw.register('../sw.js').then(
 				function(registration) {
+					console.log('== registration ==', registration);
 					// Registration was successful
+					// registration.sync.register('backgroundSync');
 					console.log('ServiceWorker registration successful with scope: ', registration.scope);
 				},
 				function(err) {
@@ -225,38 +230,21 @@ registerServiceWorker = () => {
 	}
 };
 
-createIndexedDB = () => {
-	let db, restaurants;
-	const indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-	if (!indexedDB) {
-		console.error('== Your browser dont support indexed databases ==');
+getDataFromIndexedDB = (store) => {
+	console.log('== store ==', store);
+	const getRestaurantsRequest = store.get('Mission Chinese Food');
+	getRestaurantsRequest.onsuccess = event => {
+		console.log('== success ==', event);
+		console.log('== success ==', getRestaurantsRequest.result);
 	}
-	DBHelper.fetchRestaurants((err, result) => {
-		restaurants = result;
-	});
-	const dbOpenRequest = indexedDB.open('restaurant-db', 1);
-	dbOpenRequest.onerror = (error) => {
-		console.error('== Failed to open indexed database !');
-		console.error('== error message', error.target);
-	};
-	dbOpenRequest.onsuccess = (event) => {
-		db = event.target.result;
-	};
-	dbOpenRequest.onupgradeneeded = (event) => {
-		db = event.target.result;
-		const keys = Object.keys(restaurants[0]);
-		const objectStore = db.createObjectStore('restaurants', { keyPath: 'id' });
-		objectStore.createIndex('name', 'name', { unique: false });
-		objectStore.createIndex('address', 'address', { unique: false });
-		objectStore.transaction.oncomplete = (event) => {
-			const restaurantsObjectStore = db.transaction([ 'restaurants' ], 'readwrite').objectStore('restaurants');
-			addToIndexedDB(restaurantsObjectStore, restaurants);
-		};
-	};
-};
+}
 
-addToIndexedDB = (store, restaurants) => {
-	restaurants.forEach((restaurant) => {
-		store.add(restaurant);
-	});
-};
+toggleMap = () => {
+	const map = document.getElementById('map');
+	if (map.style.display === 'none') {
+		map.style.display = 'block'
+		window.initMap();
+	} else {
+		map.style.display = 'none'
+	}
+}

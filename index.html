@@ -15,12 +15,13 @@
   <header>
     <nav>
       <h1><a href="/">Restaurant Reviews</a></h1>
+      <button onclick="toggleMap()" title="Toggle Restaurants map" id="toggleMap">🌎</button>
     </nav>
   </header>
 
   <main id="maincontent">
     <section id="map-container">
-      <div id="map" tabindex="0"></div>
+      <div id="map" tabindex="0" style="display: none;"></div>
     </section>
     <section>
       <div class="filter-options">
@@ -38,7 +39,7 @@
   <script type="application/javascript" charset="utf-8" src="js/dbhelper.js"></script>
   <script type="application/javascript" charset="utf-8" src="js/main.js"></script>
   <script src="node_modules/echo-js/dist/echo.min.js"></script>
-  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAd_9_RHmT1KA9QPBg0mwkHJhU4M2b2PRk&libraries=places&callback=initMap"></script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAd_9_RHmT1KA9QPBg0mwkHJhU4M2b2PRk&libraries=places"></script>
   <script>
   </script>
   <script>

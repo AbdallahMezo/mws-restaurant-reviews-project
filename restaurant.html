@@ -8,6 +8,9 @@
     <link rel="stylesheet" src="//normalize-css.googlecode.com/svn/trunk/normalize.css" />
     <link rel="stylesheet" href="css/styles.css" type="text/css">
     <title>Restaurant Info</title>
+    <style>
+      #breadcrumb{padding:10px 40px 16px;list-style:none;background-color:#eee;font-size:17px;margin:0;width:50%}#breadcrumb li{display:inline;margin:0}#breadcrumb li+li:before{padding:8px;color:#000;content:"/\00a0"}#breadcrumb li a{color:#01447e}#breadcrumb li a:hover{color:#01447e;text-decoration:underline}.inside header{position:fixed;top:0;width:100%;z-index:1000}.inside #map-container{background:#00f;height:87%;position:fixed;right:0;top:80px;margin:0;width:50%}.inside #map{background-color:#ccc;height:100%;width:100%;margin:0}.inside #footer{bottom:0;position:absolute;margin:0;width:50%}#restaurant-container,#reviews-container{border-bottom:1px solid #d9d9d9;border-top:1px solid #fff;padding:140px 40px 30px}#reviews-container{padding:30px 40px 80px}.user-review_wrapper{display:flex;justify-content:space-between;background-color:#333;align-items:center;padding:15px}.user-review_wrapper p{margin:0;color:#fff}.user-review_wrapper p:first-of-type{font-size:18px}.user-review_wrapper p:last-of-type{color:#dcdcdc}#reviews-container h2{color:#01447e;font-size:24pt;font-weight:300;letter-spacing:-1px;padding-bottom:1pt}#reviews-list,fieldset,label{margin:0;padding:0}#reviews-list li{background-color:#fff;border:2px solid #f3f3f3;display:block;list-style-type:none;margin:0 0 30px;overflow:hidden;position:relative;border-top-left-radius:20px;border-bottom-right-radius:20px}#reviews-list li>p{padding:15px}#reviews-list li>p:first-of-type{background-color:#01447e;font-weight:700;width:80px;margin:10px 15px 0;padding:5px 10px;color:#fff}.rating{border:none;float:left}.rating>input{display:none}.rating>label:before{margin:5px;font-size:1.25em;font-family:FontAwesome;display:inline-block;content:"\f005"}.rating>.half:before{content:"\f089";position:absolute}.rating>label{color:#ddd;float:right}.rating:not(:checked)>label:hover,.rating:not(:checked)>label:hover~label,.rating>input:checked~label{color:gold}.rating>input:checked+label:hover,.rating>input:checked~label:hover,.rating>input:checked~label:hover~label,.rating>label:hover~input:checked~label{color:#FFED85}#review-container{border-bottom:1px solid #d9d9d9;border-top:1px solid #fff;padding:30px 40px 80px}#review-container h2{color:#01447e;font-size:24pt;font-weight:300;letter-spacing:-1px;padding-bottom:1pt}#review_form{display:flex;flex-direction:column}#review_form>div{display:flex;align-items:center;justify-content:space-between;margin:10px 0}#review_form>div>label,#review_form>label{font-size:10pt;font-weight:300;color:#01447e}#review_form>div input{padding:10px;width:60%;border-radius:3px;border:none}#review_form>textarea{padding:10px;margin:10px 0;border-radius:2px;border:none}#send_review{position:relative;width:15%;padding:10px;background-color:#01447e;color:#fff;border:none;border-radius:3px;cursor:pointer;overflow:hidden;-webkit-transition-duration:.4s;transition-duration:.4s}#send_review:after{content:"";background:#0183f3;display:block;position:absolute;padding-top:300%;padding-left:350%;margin-left:-20px!important;margin-top:-120%;opacity:0;transition:all .8s}#send_review:active:after{padding:0;margin:0;opacity:1;transition:0s}
+    </style>
   </head>
 
   <body class="inside">
@@ -29,6 +32,7 @@
       </section>
       <section class="col-6 col-s-12 col-xs-12">
         <section id="restaurant-container">
+          <button id="isFavorite" onclick="favoriteRestaurant()" title="Do you like this restaurant ? Favorite it!"></button>
           <h3 id="restaurant-name"></h3>
           <img id="restaurant-img">
           <p id="restaurant-cuisine"></p>
@@ -38,31 +42,21 @@
         <section id="reviews-container">
           <ul id="reviews-list"></ul>
         </section>
-        <section>
-            <form id="review_form">
-                <div>
-                    <label for="reviewer_name">Your Name</label>
-                    <input type="text" name="reviewer_name" placeholder="Abdallah Ebrahim">
-                </div>
-                <div>
-                    <label for="rating">Rate</label>
-                    <fieldset name="rating" class="rating">
-                        <input type="radio" id="star5" name="rating" value="5" /><label class = "full" for="star5" title="Awesome - 5 stars"></label>
-                        <input type="radio" id="star4half" name="rating" value="4 and a half" /><label class="half" for="star4half" title="Pretty good - 4.5 stars"></label>
-                        <input type="radio" id="star4" name="rating" value="4" /><label class = "full" for="star4" title="Pretty good - 4 stars"></label>
-                        <input type="radio" id="star3half" name="rating" value="3 and a half" /><label class="half" for="star3half" title="Meh - 3.5 stars"></label>
-                        <input type="radio" id="star3" name="rating" value="3" /><label class = "full" for="star3" title="Meh - 3 stars"></label>
-                        <input type="radio" id="star2half" name="rating" value="2 and a half" /><label class="half" for="star2half" title="Kinda bad - 2.5 stars"></label>
-                        <input type="radio" id="star2" name="rating" value="2" /><label class = "full" for="star2" title="Kinda bad - 2 stars"></label>
-                        <input type="radio" id="star1half" name="rating" value="1 and a half" /><label class="half" for="star1half" title="Meh - 1.5 stars"></label>
-                        <input type="radio" id="star1" name="rating" value="1" /><label class = "full" for="star1" title="Sucks big time - 1 star"></label>
-                        <input type="radio" id="starhalf" name="rating" value="half" /><label class="half" for="starhalf" title="Sucks big time - 0.5 stars"></label>
-                    </fieldset>
-                </div>
-                <label for="review">Write your review</label>
-                <textarea name="review" cols="10" rows="10" placeholder="I like this restaurant so much!"></textarea>
-                <button id="send_review">Send</button>
-              </form>
+        <section id="review-container">
+          <h2>Submit your review</h2>
+          <form id="review_form" action="javascript:void(0)" target="_blank">
+            <div>
+                <label for="reviewer_name">Your Name</label>
+                <input id="reviewer-name" type="text" name="reviewer_name" placeholder="Abdallah Ebrahim" required>
+            </div>
+            <div>
+                <label for="rating">Rate</label>
+                <input type="number" min="1" max="5" id="rating" required>
+            </div>
+            <label for="review">Write your review</label>
+            <textarea id="review-comment" name="review" cols="10" rows="10" placeholder="I like this restaurant so much!" required></textarea>
+            <button id="send_review" onclick="sendReview()">Send</button>
+          </form>
         </section>
 
       </section>
