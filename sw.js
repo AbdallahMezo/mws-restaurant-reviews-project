@@ -22,6 +22,10 @@ const filesToCache = [
 const addToCache = (cache, files) => {
   cache.addAll(files)
 }
+const sendOfflineRequests = () => {
+  self.sendReview();
+  self.favoriteRestaurant();
+}
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -51,4 +55,12 @@ self.addEventListener('fetch', function (event) {
       return response || fetch(event.request);
     })
   );
+});
+
+self.addEventListener('sync', function(event) {
+  console.log('== event in sync ---', event);
+  if (event.tag == 'backgroundSync') {
+    console.log('== background syncc ==');
+    event.waitUntil(sendOfflineRequests());
+  }
 });

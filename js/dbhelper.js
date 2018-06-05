@@ -1,8 +1,8 @@
 /**
  * Common database helper functions.
  */
+const dbObjectStore = {};
 class DBHelper {
-
   /**
    * Database URL.
    * Change this to restaurants.json file location on your server.
@@ -11,25 +11,44 @@ class DBHelper {
     const port = 1337 // Change this to your server port
     return `http://localhost:${port}/restaurants`;
   }
+  // static setObjectStore(objectStore){
+  //   console.log('== DBHelper.objectStore ==', DBHelper.objectStore);
+  //   console.log('== this.objectStore ==', this.objectStore);
+  //   console.log('== objectStore ==', objectStore);
+  //   dbObjectStore[objectStore.name] = objectStore.data;
+  //   console.log('== dbObjectStore ==', dbObjectStore);
+  //   DBHelper.objectStore = dbObjectStore;
+  // }
 
   /**
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', DBHelper.DATABASE_URL);
-    xhr.onload = () => {
-      if (xhr.status === 200) { // Got a success response from server!
-        const restaurants = JSON.parse(xhr.responseText);
-        callback(null, restaurants);
-      } else { // Oops!. Got an error from server.
-        const error = (`Request failed. Returned status of ${xhr.status}`);
-        callback(error, null);
-      }
-    };
-    xhr.send();
+    const url = DBHelper.DATABASE_URL;
+    fetch(url).then((response) => {
+      return response.json()
+    }).then(restaurants => {
+		  DBHelper.createIndexedDB(restaurants, 'restaurants');
+      callback(null, restaurants);
+    }).catch(error => {
+      // TODO: Get the indexed db from navigator or window and fetch the data for the user
+      this.openDBGetRequest('restaurants', callback);
+    })
   }
-
+  /**
+   * Fetch reviews
+   */
+  static fetchReviews(callback){
+    const url = `http://localhost:1337/reviews/`
+    fetch(url).then((response) => {
+      return response.json()
+    }).then(reviews => {
+      callback(null, reviews);
+    }).catch(error => {
+      // TODO: Get the indexed db from navigator or window and fetch the data for the user
+      this.openDBGetRequest('reviews', callback);
+    })
+  }
   /**
    * Fetch a restaurant by its ID.
    */
@@ -146,16 +165,12 @@ class DBHelper {
   }
 
   /**
-   * Restaurant image URL.
-   */
-  static imageUrlForRestaurant(restaurant) {
-    return (`/img/${restaurant.photograph}.jpg`);
-  }
-
-  /**
    * Map marker for a restaurant.
    */
   static mapMarkerForRestaurant(restaurant, map) {
+    if(!restaurant || !map){
+      return;
+    }
     const marker = new google.maps.Marker({
       position: restaurant.latlng,
       title: restaurant.name,
@@ -166,4 +181,75 @@ class DBHelper {
     return marker;
   }
 
+  static createIndexedDB(objects, name) {
+    return this.openDBRequest(objects, name);
+  };
+
+  static openDBRequest(entity, dbName) {
+    let db, objectStore;
+    const indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    if (!indexedDB) {
+      console.error('== Your browser dont support indexed databases ==');
+    }
+    const dbOpenRequest = indexedDB.open(`${dbName}-db`, 1);
+    dbOpenRequest.onerror = (error) => {
+      console.error('== Failed to open indexed database !');
+      console.error('== error message', error.target);
+      console.error('== error message', error.target);
+    };
+    dbOpenRequest.onsuccess = (event) => {
+      db = event.target.result;
+    };
+    dbOpenRequest.onupgradeneeded = (event) => {
+      db = event.target.result;
+      const keys = Object.keys(entity[0]);
+      objectStore = db.createObjectStore(dbName, { keyPath: 'id' });
+      objectStore.createIndex('name', 'name', { unique: false });
+      if(dbName === 'reviews'){
+        objectStore.createIndex('restaurant_id', 'restaurant_id', { unique: false });
+      }
+      objectStore.transaction.oncomplete = (event) => {
+        objectStore = db.transaction([ dbName ], 'readwrite').objectStore(dbName);
+        console.log('== objectStore ==', objectStore);
+        this.addToIndexedDB(objectStore, entity);
+        dbObjectStore[dbName] = objectStore;
+        console.log('== dbObjectStore ==', dbObjectStore);
+      };
+    };
+  };
+
+  static openDBGetRequest(dbName, callback){
+    const indexedDB =  window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+      let objectStore, objectStoreRequest, db, data;
+      const request = indexedDB.open(`${dbName}-db`, 1);
+      request.onsuccess = event => {
+        db = request.result;
+        const transaction = db.transaction(dbName, 'readonly');
+        transaction.oncomplete = event => {
+          console.log('= event on transaction complete ==', event);
+        }
+        objectStore = transaction.objectStore(dbName);
+        objectStoreRequest = objectStore.getAll();
+        objectStoreRequest.onsuccess = event => {
+          data = event.target.result;
+          if(!data){
+            console.error('Error while fetching reviews => ', error);
+            callback(error, null);
+            return;
+          }
+          callback(null, data);
+        }
+      }
+  }
+
+  static addToIndexedDB(store, objects){
+    objects.forEach((object) => {
+      store.add(object);
+    });
+  };
+
+  // static getFromIndexedDB(store, keys){
+  //   const results = keys.map(key => store.get(key));
+  //   return results;
+  // }
 }

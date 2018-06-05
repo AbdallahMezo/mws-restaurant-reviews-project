@@ -14,11 +14,14 @@ window.initMap = () => {
         scrollwheel: false
       });
       fillBreadcrumb();
+      fetchRestaurantReviews(restaurant);
       DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
+      DBHelper.fetchReviews((err, reviews) => {
+        DBHelper.createIndexedDB(reviews, 'reviews');
+      });
     }
   });
 }
-
 /**
  * Get current restaurant from page URL.
  */
@@ -36,7 +39,7 @@ fetchRestaurantFromURL = (callback) => {
       self.restaurant = restaurant;
       if (!restaurant) {
         console.error(error);
-        return;
+        self.restaurant = DBHelper.getFromIndexedDB(DBHelper.getObjectStore('restaurants'), id);
       }
       fillRestaurantHTML();
       callback(null, restaurant)
@@ -48,6 +51,10 @@ fetchRestaurantFromURL = (callback) => {
  * Create restaurant HTML and add it to the webpage
  */
 fillRestaurantHTML = (restaurant = self.restaurant) => {
+  const favoriteIconSpan = document.getElementById('isFavorite');
+  favoriteIconSpan.innerHTML = restaurant.is_favorite === 'true' ? '💘' : '💙';
+  favoriteIconSpan.className = 'isFavorite';
+  console.log('== restaurant ==', restaurant);
   const name = document.getElementById('restaurant-name');
   name.innerHTML = restaurant.name;
 
@@ -56,7 +63,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
 
   const image = document.getElementById('restaurant-img');
   image.className = 'restaurant-img lazy'
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  image.src = `../img/${restaurant.photograph}.jpg`;
   image.setAttribute('alt', `${restaurant.name} Restaurant`);
 
   const cuisine = document.getElementById('restaurant-cuisine');
@@ -66,8 +73,6 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   if (restaurant.operating_hours) {
     fillRestaurantHoursHTML();
   }
-  // fill reviews
-  fillReviewsHTML();
 }
 
 /**
@@ -93,12 +98,11 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (reviews = self.restaurant.reviews) => {
+fillReviewsHTML = (reviews) => {
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h2');
   title.innerHTML = 'Reviews';
   container.appendChild(title);
-
   if (!reviews) {
     const noReviews = document.createElement('p');
     noReviews.innerHTML = 'No reviews yet!';
@@ -110,6 +114,7 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
     ul.appendChild(createReviewHTML(review));
   });
   container.appendChild(ul);
+
 }
 
 /**
@@ -125,7 +130,8 @@ createReviewHTML = (review) => {
   userReviewWrapper.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = review.date;
+  const dateInDays = new Date(review.createdAt).toDateString();
+  date.innerHTML = dateInDays.toString('yyyy-MM-dd');
   userReviewWrapper.appendChild(date);
   li.appendChild(userReviewWrapper);
 
@@ -164,4 +170,86 @@ getParameterByName = (name, url) => {
   if (!results[2])
     return '';
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+/**
+ * Handle send button click
+ */
+sendReview = () => {
+  const data = getFormData(restaurant = self.restaurant);
+  const url = 'http://localhost:1337/reviews/'
+  fetch(url, {
+    body: JSON.stringify(data),
+    method: 'POST',
+  }).then(result => {
+    console.log('result ', result)
+  }).catch(error => {
+    console.error('error in sending review ==> ', error);
+    console.log('stored to be send later <3');
+  })
+  const form = document.getElementById('review_form');
+  form.reset();
+  fetchRestaurantReviews(restaurant = self.restaurant)
+}
+
+/**
+ * Fetch Restaurants reviews
+ */
+fetchRestaurantReviews = (restaurant = self.restaurant) => {
+  DBHelper.fetchReviews((err, reviews) => {
+    console.log('== reviews ==', reviews);
+    console.log('== reviews ==', reviews);
+    const restaurantReviews = reviews.filter(obj => obj.restaurant_id === restaurant.id)
+    console.log('== restaurantReviews ==', restaurantReviews);
+    fillReviewsHTML(restaurantReviews)
+  })
+}
+/**
+ * Get form data
+ */
+getFormData = (restaurant = self.restaurant) => {
+  const data = {};
+  const name = document.getElementById('reviewer-name').value
+  data.name = name;
+
+  const restaurantId = restaurant.id
+  data.restaurant_id = restaurantId;
+
+  const rating = document.getElementById('rating').value;
+  data.rating = rating;
+  const comment = document.getElementById('review-comment').value
+  data.comments = comment;
+  if(!name || !comment){
+    return;
+  }
+  return data;
+}
+/**
+ * Handle favourting restaurant
+ */
+favoriteRestaurant = () => {
+
+  if(navigator.onLine){
+    const favoriteButton = document.getElementById('isFavorite');
+    let isFavorited = favoriteButton.innerHTML === '💘' ? true : false;
+    console.log('-- isFavorited --', isFavorited);
+    const id = self.restaurant.id;
+    const url = `http://localhost:1337/restaurants/${id}/?is_favorite=${!isFavorited}`;
+    isFavorited = !isFavorited;
+    fetch(url, {
+      method: 'PUT',
+    }).then(result => {
+      favoriteButton.innerHTML = isFavorited ? '💘' : '💙';
+    }).catch(error => {
+      console.error('error in sending review ==> ', error);
+      console.log('stored to be send later <3');
+    })
+  } else {
+    navigator.serviceWorker.register('../sw.js').then(reg => {
+      reg.sync.register('backgroundSync');
+      console.log('== ofline ==');
+    })
+
+  }
+
 }
