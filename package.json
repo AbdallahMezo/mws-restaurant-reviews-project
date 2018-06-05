@@ -1,0 +1,28 @@
+{
+  "name": "mws-restaurant-reviews-project",
+  "version": "1.0.0",
+  "description": "- Clone the project\r - `npm install` *Install dependancies*\r - `gulp` *run gulp and start server*\r - `localhost:8000` *start browsing*",
+  "main": "index.html",
+  "dependencies": {
+    "echo-js": "^1.7.3",
+    "gulp": "^3.9.1",
+    "gulp-connect": "^5.5.0",
+    "gulp-watch": "^5.0.0",
+    "gulp-webp": "^3.0.0",
+    "vanilla-lazyload": "^8.7.1"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AbdallahMezo/mws-restaurant-reviews-project.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AbdallahMezo/mws-restaurant-reviews-project/issues"
+  },
+  "homepage": "https://github.com/AbdallahMezo/mws-restaurant-reviews-project#readme"
+}
