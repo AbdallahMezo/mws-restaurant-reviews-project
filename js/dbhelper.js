@@ -1,7 +1,6 @@
 /**
  * Common database helper functions.
  */
-const dbObjectStore = {};
 class DBHelper {
   /**
    * Database URL.
@@ -199,22 +198,32 @@ class DBHelper {
     };
     dbOpenRequest.onsuccess = (event) => {
       db = event.target.result;
+      if(db.transaction){
+        const transaction = db.transaction(dbName, 'readwrite');
+        transaction.oncomplete = event => {
+          console.log('= event on transaction complete ==', event);
+        }
+        objectStore = transaction.objectStore(dbName);
+        this.addToIndexedDB(objectStore, entity);
+        return;
+      }
     };
     dbOpenRequest.onupgradeneeded = (event) => {
       db = event.target.result;
-      const keys = Object.keys(entity[0]);
-      objectStore = db.createObjectStore(dbName, { keyPath: 'id' });
-      objectStore.createIndex('name', 'name', { unique: false });
-      if(dbName === 'reviews'){
-        objectStore.createIndex('restaurant_id', 'restaurant_id', { unique: false });
-      }
-      objectStore.transaction.oncomplete = (event) => {
-        objectStore = db.transaction([ dbName ], 'readwrite').objectStore(dbName);
-        console.log('== objectStore ==', objectStore);
-        this.addToIndexedDB(objectStore, entity);
-        dbObjectStore[dbName] = objectStore;
-        console.log('== dbObjectStore ==', dbObjectStore);
-      };
+        objectStore = db.createObjectStore(dbName, { keyPath: 'id' });
+        if(dbName === 'restaurants'){
+          objectStore.createIndex('name', 'name', { unique: false });
+        }
+        if(dbName === 'reviews'){
+          objectStore.createIndex('restaurant_id', 'restaurant_id', { unique: false });
+        }
+        if(dbName === 'offline'){
+          objectStore.createIndex('type', 'type', { unique: false });
+        }
+        objectStore.transaction.oncomplete = (event) => {
+          objectStore = db.transaction([ dbName ], 'readwrite').objectStore(dbName);
+          this.addToIndexedDB(objectStore, entity);
+        };
     };
   };
 

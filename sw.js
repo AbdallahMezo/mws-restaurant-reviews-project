@@ -1,4 +1,4 @@
-const cacheName = 'resturants-cache-v6';
+const cacheName = 'resturants-cache-v1';
 const filesToCache = [
   '/',
   '/js/dbhelper.js',
@@ -15,6 +15,8 @@ const filesToCache = [
   '/img/8.jpg',
   '/img/9.jpg',
   '/img/10.jpg',
+  '/img/icon.png',
+  'node_modules/echo-js/dist/echo.min.js',
   'index.html',
   'restaurant.html',
 ];
@@ -22,7 +24,8 @@ const filesToCache = [
 const addToCache = (cache, files) => {
   cache.addAll(files)
 }
-const sendOfflineRequests = () => {
+const sendOfflineRequests = (event) => {
+  console.log('== event ==', event);
   self.sendReview();
   self.favoriteRestaurant();
 }

@@ -24,3 +24,5 @@ In this restaurant reviews applications me & udacity built a PWA where you can r
 ### TODO:
 - Apply AMP technology
 - Add favorite icon on restaurants images on homepage
+- Use indexeddb promises
+- Refactor the application with Reactjs

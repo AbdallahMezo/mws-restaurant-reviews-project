@@ -37,10 +37,6 @@ fetchRestaurantFromURL = (callback) => {
   } else {
     DBHelper.fetchRestaurantById(id, (error, restaurant) => {
       self.restaurant = restaurant;
-      if (!restaurant) {
-        console.error(error);
-        self.restaurant = DBHelper.getFromIndexedDB(DBHelper.getObjectStore('restaurants'), id);
-      }
       fillRestaurantHTML();
       callback(null, restaurant)
     });
@@ -100,7 +96,7 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
  */
 fillReviewsHTML = (reviews) => {
   const container = document.getElementById('reviews-container');
-  const title = document.createElement('h2');
+  const title = document.createElement('h4');
   title.innerHTML = 'Reviews';
   container.appendChild(title);
   if (!reviews) {
@@ -176,20 +172,32 @@ getParameterByName = (name, url) => {
  * Handle send button click
  */
 sendReview = () => {
-  const data = getFormData(restaurant = self.restaurant);
-  const url = 'http://localhost:1337/reviews/'
-  fetch(url, {
-    body: JSON.stringify(data),
-    method: 'POST',
-  }).then(result => {
-    console.log('result ', result)
-  }).catch(error => {
-    console.error('error in sending review ==> ', error);
-    console.log('stored to be send later <3');
-  })
   const form = document.getElementById('review_form');
-  form.reset();
-  fetchRestaurantReviews(restaurant = self.restaurant)
+  const data = getFormData(restaurant = self.restaurant);
+  if(navigator.onLine){
+    console.log('-- online --');
+    console.log('-- data --', data);
+    const url = 'http://localhost:1337/reviews/'
+    fetch(url, {
+      body: JSON.stringify(data),
+      method: 'POST',
+    }).then(result => {
+      console.log('result ', result)
+    }).catch(error => {
+      console.error('error in sending review ==> ', error);
+      console.log('stored to be send later <3');
+    })
+    form.reset();
+    fetchRestaurantReviews(restaurant = self.restaurant)
+  } else {
+    data.createdAt = Date.now();
+    data.type = 'review';
+    data.id = data.createdAt;
+    addOfflineReview(data);
+    console.log('-- data --', data);
+    form.reset();
+    DBHelper.createIndexedDB([data], 'offline');
+  }
 }
 
 /**
@@ -228,12 +236,11 @@ getFormData = (restaurant = self.restaurant) => {
  * Handle favourting restaurant
  */
 favoriteRestaurant = () => {
-
+  const favoriteButton = document.getElementById('isFavorite');
+  let isFavorited = favoriteButton.innerHTML === '💘' ? true : false;
+  const id = self.restaurant.id;
   if(navigator.onLine){
-    const favoriteButton = document.getElementById('isFavorite');
-    let isFavorited = favoriteButton.innerHTML === '💘' ? true : false;
     console.log('-- isFavorited --', isFavorited);
-    const id = self.restaurant.id;
     const url = `http://localhost:1337/restaurants/${id}/?is_favorite=${!isFavorited}`;
     isFavorited = !isFavorited;
     fetch(url, {
@@ -245,11 +252,54 @@ favoriteRestaurant = () => {
       console.log('stored to be send later <3');
     })
   } else {
-    navigator.serviceWorker.register('../sw.js').then(reg => {
-      reg.sync.register('backgroundSync');
-      console.log('== ofline ==');
-    })
-
+    isFavorited = !isFavorited;
+    favoriteButton.innerHTML = isFavorited ? '💘' : '💙';
+    DBHelper.createIndexedDB([{id: id, isFavorited: isFavorited, type:'favorite'}], 'offline');
   }
 
 }
+/**
+ * Add offline review
+ */
+addOfflineReview = review => {
+  const container = document.getElementById('reviews-container');
+  const title = document.createElement('h4');
+  title.innerHTML = 'Reviews';
+  container.appendChild(title);
+  const ul = document.getElementById('reviews-list');
+  ul.appendChild(createReviewHTML(review));
+  container.appendChild(ul);
+}
+
+window.addEventListener("online", () => {
+  console.log('== online ==');
+  DBHelper.openDBGetRequest('offline-db', offlineData => {
+    if(!offlineData){
+      return;
+    }
+    const reviews = offlineData.filter(object => object.type === 'review');
+    const favorites = offlineData.filter(object => object.type === 'favorite');
+    const reviewUrl = 'http://localhost:1337/reviews/'
+    const favoriteUrl = (id, isFavorited) => `http://localhost:1337/restaurants/${id}/?is_favorite=${!isFavorited}`;
+    reviews.forEach(review => {
+      fetch(reviewUrl, {
+        body: JSON.stringify(review),
+        method: 'POST',
+      }).then(result => {
+        console.log('result ', result)
+      }).catch(error => {
+        console.error('error in sending review ==> ', error);
+      })
+    });
+    favorites.forEach(favorite => {
+      fetch(favoriteUrl(favorite.id, favorite.isFavorited), {
+        method: 'PUT',
+      }).then(result => {
+        console.log('== result ==', result);
+      }).catch(error => {
+        console.error('error in sending review ==> ', error);
+        console.log('stored to be send later <3');
+      })
+    })
+  })
+}, false);
