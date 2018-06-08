@@ -1,5 +1,6 @@
 ## HOW TO START
 
+- Clone server repo *https://github.com/udacity/mws-restaurant-stage-3* and follow them to start the server
 - Clone the project
 - `npm install` *Install dependancies*
 - `gulp` *run gulp and start server*
