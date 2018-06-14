@@ -8,7 +8,7 @@ class DBHelper {
    */
   static get DATABASE_URL() {
     const port = 1337 // Change this to your server port
-    return `http://localhost:${port}/restaurants`;
+    return `https://mws-restaurants-stage-3.herokuapp.com/restaurants`;
   }
   // static setObjectStore(objectStore){
   //   console.log('== DBHelper.objectStore ==', DBHelper.objectStore);
@@ -38,7 +38,7 @@ class DBHelper {
    * Fetch reviews
    */
   static fetchReviews(callback){
-    const url = `http://localhost:1337/reviews/`
+    const url = `https://mws-restaurants-stage-3.herokuapp.com/reviews/`
     fetch(url).then((response) => {
       return response.json()
     }).then(reviews => {

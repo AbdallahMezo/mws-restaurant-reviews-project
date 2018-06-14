@@ -177,7 +177,7 @@ sendReview = () => {
   if(navigator.onLine){
     console.log('-- online --');
     console.log('-- data --', data);
-    const url = 'http://localhost:1337/reviews/'
+    const url = 'https://mws-restaurants-stage-3.herokuapp.com/reviews/'
     fetch(url, {
       body: JSON.stringify(data),
       method: 'POST',
@@ -241,7 +241,7 @@ favoriteRestaurant = () => {
   const id = self.restaurant.id;
   if(navigator.onLine){
     console.log('-- isFavorited --', isFavorited);
-    const url = `http://localhost:1337/restaurants/${id}/?is_favorite=${!isFavorited}`;
+    const url = `https://mws-restaurants-stage-3.herokuapp.com/restaurants/${id}/?is_favorite=${!isFavorited}`;
     isFavorited = !isFavorited;
     fetch(url, {
       method: 'PUT',
@@ -279,8 +279,8 @@ window.addEventListener("online", () => {
     }
     const reviews = offlineData.filter(object => object.type === 'review');
     const favorites = offlineData.filter(object => object.type === 'favorite');
-    const reviewUrl = 'http://localhost:1337/reviews/'
-    const favoriteUrl = (id, isFavorited) => `http://localhost:1337/restaurants/${id}/?is_favorite=${!isFavorited}`;
+    const reviewUrl = 'https://mws-restaurants-stage-3.herokuapp.com/reviews/'
+    const favoriteUrl = (id, isFavorited) => `https://mws-restaurants-stage-3.herokuapp.com/restaurants/${id}/?is_favorite=${!isFavorited}`;
     reviews.forEach(review => {
       fetch(reviewUrl, {
         body: JSON.stringify(review),
