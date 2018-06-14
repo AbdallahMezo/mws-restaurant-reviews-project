@@ -16,7 +16,7 @@ const filesToCache = [
   '/img/9.jpg',
   '/img/10.jpg',
   '/img/icon.png',
-  'node_modules/echo-js/dist/echo.min.js',
+  '/js/echo.min.js',
   'index.html',
   'restaurant.html',
 ];
