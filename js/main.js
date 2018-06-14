@@ -166,8 +166,8 @@ createRestaurantHTML = (restaurant) => {
 	const image = document.createElement('img');
 	image.className = 'restaurant-img lazy';
 	image.setAttribute('alt', `${restaurant.name} Restaurant`);
-	image.setAttribute('data-echo',`mws-restaurant-reviews-project/img/${restaurant.photograph}.jpg`);
-	image.src = 'mws-restaurant-reviews-project/img/icon.png';
+	image.setAttribute('data-echo',`img/${restaurant.photograph}.jpg`);
+	image.src = 'img/icon.png';
 	li.append(image);
 
 	const name = document.createElement('h1');
@@ -214,7 +214,7 @@ registerServiceWorker = () => {
 	if ('serviceWorker' in navigator) {
 		const sw = navigator.serviceWorker;
 		window.addEventListener('load', function() {
-			sw.register('mws-restaurant-reviews-project/js/sw.js').then(
+			sw.register('/js/sw.js').then(
 				function(registration) {
 					console.log('== registration ==', registration);
 					// Registration was successful
