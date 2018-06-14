@@ -214,7 +214,7 @@ registerServiceWorker = () => {
 	if ('serviceWorker' in navigator) {
 		const sw = navigator.serviceWorker;
 		window.addEventListener('load', function() {
-			sw.register('/js/sw.js').then(
+			sw.register('/sw.js').then(
 				function(registration) {
 					console.log('== registration ==', registration);
 					// Registration was successful
