@@ -59,7 +59,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
 
   const image = document.getElementById('restaurant-img');
   image.className = 'restaurant-img lazy'
-  image.src = `../img/${restaurant.photograph}.jpg`;
+  image.src = `./../img/${restaurant.photograph}.jpg`;
   image.setAttribute('alt', `${restaurant.name} Restaurant`);
 
   const cuisine = document.getElementById('restaurant-cuisine');
