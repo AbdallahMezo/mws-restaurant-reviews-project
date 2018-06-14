@@ -10,7 +10,6 @@ self.addEventListener('install', event => {
     caches.open('resturants-cache-v1')
     .then(cache => {
       cache.addAll([
-        '/',
         'js/dbhelper.js',
         'js/main.js',
         'js/restaurant_info.js',
