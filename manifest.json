@@ -1,14 +1,15 @@
 {
-  "short_name": "Reviews",
+  "short_name": "Restaurants Reviews",
   "name": "Restaurants Reviews",
+  "description": "Shows nearby restaurants and its reviews",
   "icons": [
     {
-      "src": "/img/icon_192.png",
+      "src": "./img/icon_192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "/img/icon.png",
+      "src": "./img/icon.png",
       "type": "image/png",
       "sizes": "512x512"
     }
