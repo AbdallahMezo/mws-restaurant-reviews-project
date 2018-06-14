@@ -7,8 +7,11 @@ const sendOfflineRequests = (event) => {
 
 self.addEventListener('install', event => {
   event.waitUntil(
+    console.log('== event in sw ==', event);
     caches.open('resturants-cache-v1')
     .then(cache => {
+    console.log('== caches in sw ==', caches);
+    console.log('== cache in sw ==', cache);
       cache.addAll([
         'js/dbhelper.js',
         'js/main.js',
